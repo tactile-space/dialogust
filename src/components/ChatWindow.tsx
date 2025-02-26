@@ -60,18 +60,17 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
       if (containerRef.current) {
         containerRef.current.style.height = `${windowHeight}px`;
       }
-      
-      setTimeout(scrollToBottom, 100);
     };
 
     handleResize();
+    scrollToBottom();
 
     window.visualViewport?.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('scroll', handleResize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
       window.visualViewport?.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('scroll', handleResize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -85,13 +84,8 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     
-    setMessages([...messages, newMsg]);
+    setMessages(prev => [...prev, newMsg]);
     setNewMessage("");
-    
-    // Maintain focus on the input after sending
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -104,19 +98,19 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   return (
     <div 
       ref={containerRef} 
-      className="flex flex-col bg-background"
-      style={{ height: '100vh' }}
+      className="flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900"
+      style={{ height: '100vh', maxHeight: '-webkit-fill-available' }}
     >
-      <div className="flex items-center p-4 border-b">
+      <div className="flex items-center p-4 border-b bg-white/95 backdrop-blur-sm dark:bg-slate-900/95">
         <Button
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="mr-2"
+          className="mr-2 hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <Avatar className="w-10 h-10">
+        <Avatar className="w-10 h-10 ring-2 ring-purple-500 ring-offset-2">
           <img
             src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256&h=256&auto=format&fit=crop"
             alt="Profile"
@@ -125,7 +119,7 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
         </Avatar>
         <div className="ml-3">
           <h2 className="font-semibold">Sarah Parker</h2>
-          <p className="text-sm text-muted-foreground">Online</p>
+          <p className="text-sm text-emerald-500">Online</p>
         </div>
       </div>
 
@@ -136,17 +130,21 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
               key={message.id}
               className={`flex ${
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              } mb-4`}
             >
               <div
-                className={`max-w-[70%] rounded-lg p-3 message-appear ${
+                className={`max-w-[70%] rounded-2xl p-3 shadow-sm message-appear ${
                   message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground'
+                    ? 'bg-purple-500 text-white ml-12'
+                    : 'bg-white dark:bg-slate-800 mr-12'
                 }`}
               >
                 <p className="text-sm">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
+                <span className={`text-xs mt-1 block ${
+                  message.sender === 'user' 
+                    ? 'text-purple-100' 
+                    : 'text-slate-400'
+                }`}>
                   {message.timestamp}
                 </span>
               </div>
@@ -156,28 +154,32 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
         </div>
       </div>
 
-      <div className="border-t p-4">
-        <div className="flex gap-2 mb-4">
-          <Button variant="ghost" size="icon" className="shrink-0">
+      <div className="border-t bg-white/95 backdrop-blur-sm dark:bg-slate-900/95">
+        <div className="p-2 flex gap-1 border-b">
+          <Button variant="ghost" size="icon" className="shrink-0 text-slate-600 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20">
             <Paperclip className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0 text-slate-600 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20">
             <Image className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0 text-slate-600 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20">
             <Mic className="h-5 w-5" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="p-4 flex items-center gap-2">
           <Input
             ref={inputRef}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1"
+            className="flex-1 rounded-full border-slate-200 focus:border-purple-500 focus:ring-purple-500 dark:border-slate-700 dark:focus:border-purple-400"
           />
-          <Button onClick={handleSend} className="shrink-0" disabled={!newMessage.trim()}>
+          <Button 
+            onClick={handleSend} 
+            className="shrink-0 rounded-full bg-purple-500 hover:bg-purple-600 text-white" 
+            disabled={!newMessage.trim()}
+          >
             <Send className="h-5 w-5" />
           </Button>
         </div>
