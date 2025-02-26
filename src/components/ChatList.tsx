@@ -69,20 +69,20 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
             onClick={() => onChatSelect(chat.id)}
             className="flex items-center p-4 hover:bg-secondary cursor-pointer chat-transition border-b"
           >
-            <div className="relative">
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              {chat.unread && (
-                <CircleDot className="absolute -top-1 -right-1 w-4 h-4 text-blue-500" />
-              )}
-            </div>
+            <img
+              src={chat.avatar}
+              alt={chat.name}
+              className="w-12 h-12 rounded-full object-cover"
+            />
             <div className="ml-4 flex-1">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">{chat.name}</h3>
-                <span className="text-sm text-muted-foreground">{chat.time}</span>
+                <div className="flex items-center gap-2">
+                  {chat.unread && (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  )}
+                  <span className="text-sm text-muted-foreground">{chat.time}</span>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground truncate">
                 {chat.lastMessage}

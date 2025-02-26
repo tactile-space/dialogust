@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Image, Mic, Paperclip } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,15 @@ const dummyMessages: Message[] = [
 const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = () => {
     if (!newMessage.trim()) return;
@@ -88,31 +97,34 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
+        <div className="flex flex-col justify-end min-h-full">
+          {messages.map((message) => (
             <div
-              className={`max-w-[70%] rounded-lg p-3 message-appear ${
-                message.sender === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground'
+              key={message.id}
+              className={`flex ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <p className="text-sm">{message.content}</p>
-              <span className="text-xs opacity-70 mt-1 block">
-                {message.timestamp}
-              </span>
+              <div
+                className={`max-w-[70%] rounded-lg p-3 message-appear ${
+                  message.sender === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground'
+                }`}
+              >
+                <p className="text-sm">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block">
+                  {message.timestamp}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <div className="border-t p-4">
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2 mb-4">
           <Button variant="ghost" size="icon" className="shrink-0">
             <Paperclip className="h-5 w-5" />
           </Button>
@@ -122,6 +134,8 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
           <Button variant="ghost" size="icon" className="shrink-0">
             <Mic className="h-5 w-5" />
           </Button>
+        </div>
+        <div className="flex items-center gap-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
