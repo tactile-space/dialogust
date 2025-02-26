@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Image, Mic, Paperclip } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -42,6 +41,7 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,6 +50,28 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const windowHeight = window.visualViewport?.height || window.innerHeight;
+      
+      if (containerRef.current) {
+        containerRef.current.style.height = `${windowHeight}px`;
+      }
+      
+      setTimeout(scrollToBottom, 100);
+    };
+
+    handleResize();
+
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('scroll', handleResize);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('scroll', handleResize);
+    };
+  }, []);
 
   const handleSend = () => {
     if (!newMessage.trim()) return;
@@ -73,7 +95,11 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div 
+      ref={containerRef} 
+      className="flex flex-col bg-background"
+      style={{ height: '100vh' }}
+    >
       <div className="flex items-center p-4 border-b">
         <Button
           variant="ghost"
