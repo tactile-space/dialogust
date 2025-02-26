@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Image, Mic, Paperclip } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -85,6 +87,11 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
     
     setMessages([...messages, newMsg]);
     setNewMessage("");
+    
+    // Maintain focus on the input after sending
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -163,6 +170,7 @@ const ChatWindow = ({ onBack, chatId }: ChatWindowProps) => {
         </div>
         <div className="flex items-center gap-2">
           <Input
+            ref={inputRef}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
